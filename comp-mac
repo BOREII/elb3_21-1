@@ -1,2 +1,0 @@
-g++ -mmacosx-version-min=10.14 -c $1.cpp `wx-config --cflags` -O2  
-g++ -mmacosx-version-min=10.14 $1.o `wx-config --libs` -o $1 
