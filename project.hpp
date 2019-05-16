@@ -1,104 +1,112 @@
-//
-//  project.hpp
-//  
-//
-//  Created by Ayazhan on 18/04/2019.
-//
-
-#ifndef project_hpp
-#define project_hpp
-
-#include <stdio.h>
-#include <iostream>
 #include <wx/wx.h>
 #include <wx/file.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/sstream.h>
 #include <wx/string.h>
+#include <stdlib.h>
+#include <deque>
+#include <string>
+#include <array>
+#include <sstream>
+#include <math.h>
+#define _USE_MATH_DEFINES
 
+std::string DoubleToString(double);
 
-class Begin: public wxApp{
+enum class Button {
+  ZERO,
+  ONE,
+  TWO,
+  THREE,
+  FOUR,
+  FIVE,
+  SIX,
+  SEVEN,
+  EIGHT,
+  NINE,
+  ADD,
+  SUBTRACT,
+  MULTIPLY,
+  DIVIDE,
+  UP,
+  SWAP,
+  SHG,
+  SHG2,
+  VO,
+  SP,
+  P,
+  POWER,
+  BP,
+  PP,
+  CX,
+  POINT,
+  NEGATIVE,
+  VP,
+  F
+};
+
+class MainApp: public wxApp {
 public:
-    virtual bool OnInit();
+  bool OnInit() override;
 };
 
-class MyWin;
-
-class MyWin:public wxFrame{
-    wxTextCtrl *tc;
-    wxButton *my_button1;
-    wxButton *my_button2;
-    wxPanel *m_pan;
+class MainFrame : public wxFrame {
 public:
-    //frame that contains all the buttons
-    MyWin(const wxString& title);
+    explicit MainFrame(const wxString& title, const wxSize& size);
+
+    void OnZero(wxCommandEvent&);
+    void OnOne(wxCommandEvent&);
+    void OnTwo(wxCommandEvent&);
+    void OnThree(wxCommandEvent&);
+    void OnFour(wxCommandEvent&);
+    void OnFive(wxCommandEvent&);
+    void OnSix(wxCommandEvent&);
+    void OnSeven(wxCommandEvent&);
+    void OnEight(wxCommandEvent&);
+    void OnNine(wxCommandEvent&);
     
-    void on_1(wxCommandEvent& event);
-    void on_2(wxCommandEvent& event);
-    void on_3(wxCommandEvent& event);
-    void on_4(wxCommandEvent& event);
-    void on_5(wxCommandEvent& event);
-    void on_6(wxCommandEvent& event);
-    void on_7(wxCommandEvent& event);
-    void on_8(wxCommandEvent& event);
-    void on_9(wxCommandEvent& event);
-    void on_0(wxCommandEvent& event);
+    void OnAdd(wxCommandEvent&);
+    void OnSubtract(wxCommandEvent&);
+    void OnMultiply(wxCommandEvent&);
+    void OnDivide(wxCommandEvent&);
+    void OnUp(wxCommandEvent&);
+    void OnSwap(wxCommandEvent&);
     
-    void on_swap(wxCommandEvent& event);
-    void on_up(wxCommandEvent& event);
-    void on_mult(wxCommandEvent& event);
-    void on_plus(wxCommandEvent& event);
-    void on_division(wxCommandEvent& event);
-    void on_minus(wxCommandEvent& event);
+    void OnShg(wxCommandEvent&);
+    void OnShg2(wxCommandEvent&);
+    void OnVo(wxCommandEvent&);
+    void OnSp(wxCommandEvent&);
+    void OnP(wxCommandEvent&);
+    void OnPower(wxCommandEvent&);
+    void OnBp(wxCommandEvent&);
+    void OnPp(wxCommandEvent&);
+    void OnCx(wxCommandEvent&);
     
-    void on_shg(wxCommandEvent& event);
-    void on_shg2(wxCommandEvent& event);
-    void on_vo(wxCommandEvent& event);
-    void on_sp(wxCommandEvent& event);
-    void on_p(wxCommandEvent& event);
-    void on_pow(wxCommandEvent& event);
-    void on_bp(wxCommandEvent& event);
-    void on_pp(wxCommandEvent& event);
-    
-    void on_cx(wxCommandEvent& event);
-    
-    void on_comma(wxCommandEvent& event);
-    void on_negative(wxCommandEvent& event);
-    void on_vp(wxCommandEvent& event);
-    void on_f(wxCommandEvent& event);
+    void OnPoint(wxCommandEvent&);
+    void OnNegative(wxCommandEvent&);
+    void OnVp(wxCommandEvent&);
+    void OnF(wxCommandEvent&);
+
+private:
+  wxPanel*          panel;
+  wxTextCtrl* textControl;
+
+  const wxSize buttonSize = wxSize(40, 40);
+
+  static size_t MakeId (Button button) { return static_cast<size_t>(button); }
 };
 
-enum buttons{
-    ID_BUTTON0 = 1500,
-    ID_BUTTON1,
-    ID_BUTTON2,
-    ID_BUTTON3,
-    ID_BUTTON4,
-    ID_BUTTON5,
-    ID_BUTTON6,
-    ID_BUTTON7,
-    ID_BUTTON8,
-    ID_BUTTON9,
-    ID_MINUS,
-    ID_DIVISION,
-    ID_PLUS,
-    ID_MULT,
-    ID_UP,
-    ID_SWAP,
-    ID_COMMA,
-    ID_NEGATIVE,
-    ID_VP,
-    ID_F,
-    ID_P,
-    ID_POW,
-    ID_BP,
-    ID_PP,
-    ID_SHG,
-    ID_SHG2,
-    ID_VO,
-    ID_SP,
-    ID_CX
+class Calculator{
+public:
+    bool state;
+    bool p_button;
+    bool f_button;
+    bool vp_button;
+    std::deque<double> regs;
+    std::array<int, 60> ram;
+    std::string number;
+    
+    Calculator();
 };
 
-#endif 
