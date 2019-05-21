@@ -1,7 +1,8 @@
-#include "frame.hpp"
+    #include "frame.hpp"
 #include "computations.hpp"
 
 #include <iomanip>
+#include <numeric>
 
 bool MainApp::OnInit() {
     auto frame = new MainFrame("Calculator", wxSize(300, 400));
@@ -19,42 +20,42 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 
     //........................................NUMBER_BUTTONS........................................
 
-    auto buttonZero  = new wxButton(panel, MakeId(Button::ZERO) , "0",  wxPoint(20 , 270),  BUTTON_SIZE);
-    auto buttonOne   = new wxButton(panel, MakeId(Button::ONE)  , "1",  wxPoint(20 , 230),  BUTTON_SIZE);
-    auto buttonTwo   = new wxButton(panel, MakeId(Button::TWO)  , "2",  wxPoint(70 , 230),  BUTTON_SIZE);
-    auto buttonThree = new wxButton(panel, MakeId(Button::THREE), "3",  wxPoint(120, 230),  BUTTON_SIZE);
-    auto buttonFour  = new wxButton(panel, MakeId(Button::FOUR) , "4",  wxPoint(20 , 190),  BUTTON_SIZE);
-    auto buttonFive  = new wxButton(panel, MakeId(Button::FIVE) , "5",  wxPoint(70 , 190),  BUTTON_SIZE);
-    auto buttonSix   = new wxButton(panel, MakeId(Button::SIX)  , "6",  wxPoint(120, 190),  BUTTON_SIZE);
-    auto buttonSeven = new wxButton(panel, MakeId(Button::SEVEN), "7",  wxPoint(20 , 150),  BUTTON_SIZE);
-    auto buttonEight = new wxButton(panel, MakeId(Button::EIGHT), "8",  wxPoint(70 , 150),  BUTTON_SIZE);
-    auto buttonNine  = new wxButton(panel, MakeId(Button::NINE) , "9",  wxPoint(120, 150),  BUTTON_SIZE);
+	auto buttonZero  = new wxButton(panel, MakeId(Button::ZERO) , "0",  wxPoint(20 , 270),  BUTTON_SIZE);
+	auto buttonOne   = new wxButton(panel, MakeId(Button::ONE)  , "1",  wxPoint(20 , 230),  BUTTON_SIZE);
+	auto buttonTwo   = new wxButton(panel, MakeId(Button::TWO)  , "2",  wxPoint(70 , 230),  BUTTON_SIZE);
+	auto buttonThree = new wxButton(panel, MakeId(Button::THREE), "3",  wxPoint(120, 230),  BUTTON_SIZE);
+	auto buttonFour  = new wxButton(panel, MakeId(Button::FOUR) , "4",  wxPoint(20 , 190),  BUTTON_SIZE);
+	auto buttonFive  = new wxButton(panel, MakeId(Button::FIVE) , "5",  wxPoint(70 , 190),  BUTTON_SIZE);
+	auto buttonSix   = new wxButton(panel, MakeId(Button::SIX)  , "6",  wxPoint(120, 190),  BUTTON_SIZE);
+	auto buttonSeven = new wxButton(panel, MakeId(Button::SEVEN), "7",  wxPoint(20 , 150),  BUTTON_SIZE);
+	auto buttonEight = new wxButton(panel, MakeId(Button::EIGHT), "8",  wxPoint(70 , 150),  BUTTON_SIZE);
+	auto buttonNine  = new wxButton(panel, MakeId(Button::NINE) , "9",  wxPoint(120, 150),  BUTTON_SIZE);
 
-    buttonZero ->Bind(wxEVT_BUTTON, &MainFrame::OnZero , this);
-    buttonOne  ->Bind(wxEVT_BUTTON, &MainFrame::OnOne  , this);
-    buttonTwo  ->Bind(wxEVT_BUTTON, &MainFrame::OnTwo  , this);
-    buttonThree->Bind(wxEVT_BUTTON, &MainFrame::OnThree, this);
-    buttonFour ->Bind(wxEVT_BUTTON, &MainFrame::OnFour , this);
-    buttonFive ->Bind(wxEVT_BUTTON, &MainFrame::OnFive , this);
-    buttonSix  ->Bind(wxEVT_BUTTON, &MainFrame::OnSix  , this);
-    buttonSeven->Bind(wxEVT_BUTTON, &MainFrame::OnSeven, this);
-    buttonEight->Bind(wxEVT_BUTTON, &MainFrame::OnEight, this);
-    buttonNine ->Bind(wxEVT_BUTTON, &MainFrame::OnNine , this);
+	buttonZero ->Bind(wxEVT_BUTTON, &MainFrame::OnZero , this);
+	buttonOne  ->Bind(wxEVT_BUTTON, &MainFrame::OnOne  , this);
+	buttonTwo  ->Bind(wxEVT_BUTTON, &MainFrame::OnTwo  , this);
+	buttonThree->Bind(wxEVT_BUTTON, &MainFrame::OnThree, this);
+	buttonFour ->Bind(wxEVT_BUTTON, &MainFrame::OnFour , this);
+	buttonFive ->Bind(wxEVT_BUTTON, &MainFrame::OnFive , this);
+	buttonSix  ->Bind(wxEVT_BUTTON, &MainFrame::OnSix  , this);
+	buttonSeven->Bind(wxEVT_BUTTON, &MainFrame::OnSeven, this);
+	buttonEight->Bind(wxEVT_BUTTON, &MainFrame::OnEight, this);
+	buttonNine ->Bind(wxEVT_BUTTON, &MainFrame::OnNine , this);
 
-    //.....................................MIDDLE_BUTTONS........................................
+	//.....................................MIDDLE_BUTTONS........................................
 
-    auto text_sin = new wxStaticText(panel, MakeId(Button::SIN), "sin"   , wxPoint(230, 180));
-    auto text_cos = new wxStaticText(panel, MakeId(Button::COS), "cos"   , wxPoint(230, 220));
-    auto text_pi  = new wxStaticText(panel, MakeId(Button::PI) , "pi"    , wxPoint(180, 180));
-    auto text_exp = new wxStaticText(panel, MakeId(Button::EXP), "exp(x)", wxPoint(170, 220));
-    auto text_log = new wxStaticText(panel, MakeId(Button::LOG), "ln"    , wxPoint(180, 140));
+	auto text_sin = new wxStaticText(panel, MakeId(Button::SIN), "sin"   , wxPoint(230, 180));
+	auto text_cos = new wxStaticText(panel, MakeId(Button::COS), "cos"   , wxPoint(230, 220));
+	auto text_pi  = new wxStaticText(panel, MakeId(Button::PI) , "pi"    , wxPoint(180, 180));
+	auto text_exp = new wxStaticText(panel, MakeId(Button::EXP), "exp(x)", wxPoint(170, 220));
+	auto text_log = new wxStaticText(panel, MakeId(Button::LOG), "ln"    , wxPoint(180, 140));
 
-    auto button_add_or_sin      = new wxButton(panel, MakeId(Button::ADD)     , "+"  , wxPoint(220, 190), BUTTON_SIZE);
-    auto button_subtract_or_cos = new wxButton(panel, MakeId(Button::SUBTRACT), "-"  , wxPoint(220, 230), BUTTON_SIZE);
-    auto button_multiply_or_pi  = new wxButton(panel, MakeId(Button::MULTIPLY), "х"  , wxPoint(170, 190), BUTTON_SIZE);
-    auto button_divide_or_exp   = new wxButton(panel, MakeId(Button::DIVIDE)  , "/"  , wxPoint(170, 230), BUTTON_SIZE);
-    auto button_insert          = new wxButton(panel, MakeId(Button::INSERT)  , "↑"  , wxPoint(220, 150), BUTTON_SIZE);
-    auto button_swap_or_log     = new wxButton(panel, MakeId(Button::SWAP)    , "swp", wxPoint(170, 150), BUTTON_SIZE);
+	auto button_add_or_sin      = new wxButton(panel, MakeId(Button::ADD)     , "+"  , wxPoint(220, 190), BUTTON_SIZE);
+	auto button_subtract_or_cos = new wxButton(panel, MakeId(Button::SUBTRACT), "-"  , wxPoint(220, 230), BUTTON_SIZE);
+	auto button_multiply_or_pi  = new wxButton(panel, MakeId(Button::MULTIPLY), "х"  , wxPoint(170, 190), BUTTON_SIZE);
+	auto button_divide_or_exp   = new wxButton(panel, MakeId(Button::DIVIDE)  , "/"  , wxPoint(170, 230), BUTTON_SIZE);
+	auto button_insert          = new wxButton(panel, MakeId(Button::INSERT)  , "↑"  , wxPoint(220, 150), BUTTON_SIZE);
+	auto button_swap_or_log     = new wxButton(panel, MakeId(Button::SWAP)    , "swp", wxPoint(170, 150), BUTTON_SIZE);
 
 	button_add_or_sin     ->Bind(wxEVT_BUTTON, &MainFrame::OnAddOrSin     , this);
 	button_subtract_or_cos->Bind(wxEVT_BUTTON, &MainFrame::OnSubtractOrCos, this);
@@ -63,59 +64,59 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	button_insert         ->Bind(wxEVT_BUTTON, &MainFrame::OnInsert       , this);
 	button_swap_or_log    ->Bind(wxEVT_BUTTON, &MainFrame::OnSwapOrLog    , this);
 
-    //......................................LOWER_BUTTONS..............................................
+	//......................................LOWER_BUTTONS..............................................
 
-    auto text_inverse             = new wxStaticText(panel, MakeId(Button::INVERSE)            , "1/x" , wxPoint(80 , 260));
-    auto text_square              = new wxStaticText(panel, MakeId(Button::SQUARE)             , "x^2" , wxPoint(130, 260));
-    auto text_scientific_notation = new wxStaticText(panel, MakeId(Button::SCIENTIFIC_NOTATION), "√x"  , wxPoint(180, 260));
-    // Сделать текст для поворотов влево и вправо!!!
-    // auto text_scroll_left         = new wxStaticText(panel, MakeId(Button::SCROLL_LEFT),       , /* значок поворота влево */, wxPoint(/* положение */));
+	auto text_inverse             = new wxStaticText(panel, MakeId(Button::INVERSE)            , "1/x" , wxPoint(80 , 260));
+	auto text_square              = new wxStaticText(panel, MakeId(Button::SQUARE)             , "x^2" , wxPoint(130, 260));
+	auto text_scientific_notation = new wxStaticText(panel, MakeId(Button::SCIENTIFIC_NOTATION), "√x"  , wxPoint(180, 260));
+	// Сделать текст для поворотов влево и вправо!!!
+	// auto text_scroll_left         = new wxStaticText(panel, MakeId(Button::SCROLL_LEFT),       , /* значок поворота влево */, wxPoint(/* положение */));
 	// auto text_scroll_right        = new wxStaticText(panel, MakeId(Button::SCROLL_RIGHT),      , /* значок поворота влево */, wxPoint(/* положение */));
 
-    auto button_point_or_inverse_or_scroll_left    = new wxButton(panel, MakeId(Button::POINT)   , "."  , wxPoint(70 , 270), BUTTON_SIZE);
-    auto button_negative_or_square_or_scroll_right = new wxButton(panel, MakeId(Button::NEGATIVE), "/-/", wxPoint(120, 270), BUTTON_SIZE);
-    auto button_scientific_notation_or_sqrt        = new wxButton(panel, MakeId(Button::SQRT)    , "ВП" , wxPoint(170, 270), BUTTON_SIZE);
-    auto button_f                                  = new wxButton(panel, MakeId(Button::F)       , "F"  , wxPoint(220, 270), BUTTON_SIZE);
+	auto button_point_or_inverse_or_scroll_left    = new wxButton(panel, MakeId(Button::POINT)   , "."  , wxPoint(70 , 270), BUTTON_SIZE);
+	auto button_negative_or_square_or_scroll_right = new wxButton(panel, MakeId(Button::NEGATIVE), "/-/", wxPoint(120, 270), BUTTON_SIZE);
+	auto button_scientific_notation_or_sqrt        = new wxButton(panel, MakeId(Button::SQRT)    , "ВП" , wxPoint(170, 270), BUTTON_SIZE);
+	auto button_f                                  = new wxButton(panel, MakeId(Button::F)       , "F"  , wxPoint(220, 270), BUTTON_SIZE);
 
 	button_point_or_inverse_or_scroll_left   ->Bind(wxEVT_BUTTON, &MainFrame::OnPointOrInverseOrScrollLeft   , this);
 	button_negative_or_square_or_scroll_right->Bind(wxEVT_BUTTON, &MainFrame::OnNegativeOrSquareOrScrollRight, this);
 	button_scientific_notation_or_sqrt       ->Bind(wxEVT_BUTTON, &MainFrame::OnScientificNotationOrSqrt     , this);
 	button_f                                 ->Bind(wxEVT_BUTTON, &MainFrame::OnF                            , this);
 
-    //........................................UPPER_BUTTONS............................................
+	//........................................UPPER_BUTTONS............................................
 
-    auto text_shg   = new wxStaticText(panel, MakeId(Button::SHG)  , "рр" , wxPoint(80 , 60 ));
-    auto text_shg2  = new wxStaticText(panel, MakeId(Button::SHG2) , "рп" , wxPoint(130, 60 ));
-    auto text_vo    = new wxStaticText(panel, MakeId(Button::VO)   , "x≥0", wxPoint(180, 60 ));
-    auto text_sp    = new wxStaticText(panel, MakeId(Button::SP)   , "x≠0", wxPoint(230, 60 ));
-    auto text_nop   = new wxStaticText(panel, MakeId(Button::NOP)  , "НОП", wxPoint(120, 100));
-    auto text_bp    = new wxStaticText(panel, MakeId(Button::BP)   , "x=0", wxPoint(180, 100));
-    auto text_pp    = new wxStaticText(panel, MakeId(Button::PP)   , "pp" , wxPoint(230, 100));
+	auto text_shg   = new wxStaticText(panel, MakeId(Button::STEP) , "рр" , wxPoint(80 , 60 ));
+	auto text_shg2  = new wxStaticText(panel, MakeId(Button::STEP2), "рп" , wxPoint(130, 60 ));
+	auto text_vo    = new wxStaticText(panel, MakeId(Button::VO)   , "x≥0", wxPoint(180, 60 ));
+	auto text_sp    = new wxStaticText(panel, MakeId(Button::SP)   , "x≠0", wxPoint(230, 60 ));
+	auto text_nop   = new wxStaticText(panel, MakeId(Button::NOP)  , "НОП", wxPoint(120, 100));
+	auto text_bp    = new wxStaticText(panel, MakeId(Button::BP)   , "x=0", wxPoint(180, 100));
+	auto text_pp    = new wxStaticText(panel, MakeId(Button::PP)   , "pp" , wxPoint(230, 100));
 
-    auto button_p     = new wxButton(panel, MakeId(Button::P)    , "P"  , wxPoint(70 , 110), BUTTON_SIZE);
-    auto button_cx    = new wxButton(panel, MakeId(Button::CX)   , "Cx" , wxPoint(20 , 110), BUTTON_SIZE);
-    auto button_power = new wxButton(panel, MakeId(Button::POWER), "x^y", wxPoint(120, 110), BUTTON_SIZE);
-    auto button_shg   = new wxButton(panel, MakeId(Button::SHG)  , "ШГ" , wxPoint(70 , 70 ), BUTTON_SIZE);
-    auto button_shg2  = new wxButton(panel, MakeId(Button::SHG2) , "ШГ" , wxPoint(120, 70 ), BUTTON_SIZE);
-    auto button_vo    = new wxButton(panel, MakeId(Button::VO)   , "В/О", wxPoint(170, 70 ), BUTTON_SIZE);
-    auto button_sp    = new wxButton(panel, MakeId(Button::SP)   , "С/П", wxPoint(220, 70 ), BUTTON_SIZE);
-    auto button_bp    = new wxButton(panel, MakeId(Button::BP)   , "БП" , wxPoint(170, 110), BUTTON_SIZE);
-    auto button_pp    = new wxButton(panel, MakeId(Button::PP)   , "ПП" , wxPoint(220, 110), BUTTON_SIZE);
+	auto button_p     = new wxButton(panel, MakeId(Button::P)    , "P"  , wxPoint(70 , 110), BUTTON_SIZE);
+	auto button_cx    = new wxButton(panel, MakeId(Button::CX)   , "Cx" , wxPoint(20 , 110), BUTTON_SIZE);
+	auto button_power = new wxButton(panel, MakeId(Button::POWER), "x^y", wxPoint(120, 110), BUTTON_SIZE);
+	auto button_step  = new wxButton(panel, MakeId(Button::STEP) , "ШГ" , wxPoint(70 , 70 ), BUTTON_SIZE);
+	auto button_step2 = new wxButton(panel, MakeId(Button::STEP2), "ШГ" , wxPoint(120, 70 ), BUTTON_SIZE);
+	auto button_vo    = new wxButton(panel, MakeId(Button::VO)   , "В/О", wxPoint(170, 70 ), BUTTON_SIZE);
+	auto button_sp    = new wxButton(panel, MakeId(Button::SP)   , "С/П", wxPoint(220, 70 ), BUTTON_SIZE);
+	auto button_bp    = new wxButton(panel, MakeId(Button::BP)   , "БП" , wxPoint(170, 110), BUTTON_SIZE);
+	auto button_pp    = new wxButton(panel, MakeId(Button::PP)   , "ПП" , wxPoint(220, 110), BUTTON_SIZE);
 
-    button_p    ->Bind(wxEVT_BUTTON, &MainFrame::OnP    , this);
-    button_cx   ->Bind(wxEVT_BUTTON, &MainFrame::OnCx   , this);
-    button_power->Bind(wxEVT_BUTTON, &MainFrame::OnPower, this);
-    button_shg  ->Bind(wxEVT_BUTTON, &MainFrame::OnShg  , this);
-    button_shg2 ->Bind(wxEVT_BUTTON, &MainFrame::OnShg2 , this);
-    button_vo   ->Bind(wxEVT_BUTTON, &MainFrame::OnVo   , this);
-    button_sp   ->Bind(wxEVT_BUTTON, &MainFrame::OnSp   , this);
-    button_bp   ->Bind(wxEVT_BUTTON, &MainFrame::OnBp   , this);
-    button_pp   ->Bind(wxEVT_BUTTON, &MainFrame::OnPp   , this);
+	button_p    ->Bind(wxEVT_BUTTON, &MainFrame::OnP    , this);
+	button_cx   ->Bind(wxEVT_BUTTON, &MainFrame::OnCx   , this);
+	button_power->Bind(wxEVT_BUTTON, &MainFrame::OnPower, this);
+	button_step ->Bind(wxEVT_BUTTON, &MainFrame::OnShg  , this);
+	button_step2->Bind(wxEVT_BUTTON, &MainFrame::OnShg2 , this);
+	button_vo   ->Bind(wxEVT_BUTTON, &MainFrame::OnVo   , this);
+	button_sp   ->Bind(wxEVT_BUTTON, &MainFrame::OnSp   , this);
+	button_bp   ->Bind(wxEVT_BUTTON, &MainFrame::OnBp   , this);
+	button_pp   ->Bind(wxEVT_BUTTON, &MainFrame::OnPp   , this);
 
-    Centre();
+	Centre();
 }
 
-void MainFrame::UpdateTextCtrl(Calculator::TextCtrlModifier&& item) {
+void MainFrame::UpdateTextCtrl(Calculator::TextCtrlModifier item) {
 	if (std::holds_alternative<TextCtrlNullaryOperation>(item)) {
 		if (std::get<TextCtrlNullaryOperation>(item) == TextCtrlNullaryOperation::CLEAR) {
 			text_ctrl->Clear();
@@ -124,7 +125,7 @@ void MainFrame::UpdateTextCtrl(Calculator::TextCtrlModifier&& item) {
 	}
 
 	auto& [operation, text] =
-		std::get<std::pair<TextCtrlUnaryOperation, std::variant<double, std::string>>>(item);
+		std::get<std::pair<TextCtrlUnaryOperation, std::variant<long double, std::string>>>(item);
 
 	if (operation == TextCtrlUnaryOperation::ASSIGN) {
 		text_ctrl->Clear();
@@ -133,12 +134,9 @@ void MainFrame::UpdateTextCtrl(Calculator::TextCtrlModifier&& item) {
 	if (std::holds_alternative<std::string>(text)) {
 		*text_ctrl << std::get<std::string>(text);
 	} else {
-		double result = std::get<double>(text);
-		if (IsInteger(result)) {
-			*text_ctrl << static_cast<int>(result);
-		} else {
-			*text_ctrl << std::get<double>(text);
-		}
+		std::stringstream ss;
+		ss << std::defaultfloat << std::setprecision(20) <<  std::get<long double>(text);
+		*text_ctrl << ss.str();
 	}
 }
 
@@ -235,13 +233,6 @@ void MainFrame::OnF(wxCommandEvent& event) {
 
 //.........................................UPPER.......................................................
 //это раздел функций, которые в основном используются в режиме программируемого калькулятора
-/*
- Программа всегда заканчивается командой «C/П».
- Подпрограммы записываются с адресов после команды «C/П». Подпрограмма начинается записью «ПП». Каждая подпрограмма заканчивается командой «В/О».
- Для запуска программы нужно перейти в рабочий режим: «Р»«РР».
- Затем поставить счетчик команд на 00: «В/О», занести данные в соответствующие регистры и запустить программу «С/П».
- Для выполнения по шагам, клавиша «ПП»
- */
 
 void MainFrame::OnP(wxCommandEvent& event){
 	UpdateTextCtrl(calculator.PButtonPressed());
@@ -251,34 +242,33 @@ void MainFrame::OnCx(wxCommandEvent& event){
 	UpdateTextCtrl(calculator.CxButtonPressed());
 }
 
-void MainFrame::OnShg(wxCommandEvent& event){
-    text_ctrl->Clear();
+void MainFrame::OnPower(wxCommandEvent& event){
+    UpdateTextCtrl(calculator.PowerButtonPressed());
 }
 
-//я не знаю для чего эти функции в обычном режиме, они кажется имеют смысл с нажатой кнопко Р
+void MainFrame::OnShg(wxCommandEvent& event){
+    UpdateTextCtrl(calculator.ShgOrPpButtonPressed());
+}
 
 void MainFrame::OnShg2(wxCommandEvent& event){
-    text_ctrl->Clear();
+    UpdateTextCtrl(calculator.ShgOrRpButtonPressed());
 }
 
 void MainFrame::OnVo(wxCommandEvent& event){
-    text_ctrl->Clear();
+    UpdateTextCtrl(calculator.VoOrMoreButtonPressed());
 }
 
 void MainFrame::OnSp(wxCommandEvent& event){
-    text_ctrl->Clear();
+    UpdateTextCtrl(calculator.SpOrNotEqualButtonPressed());
 }
 
-void MainFrame::OnPower(wxCommandEvent& event){
-    text_ctrl->Clear();
-}
 
 void MainFrame::OnBp(wxCommandEvent& event){
-    text_ctrl->Clear();
+    UpdateTextCtrl(calculator.BPOrEqualButtonPresssed());
 }
 
 void MainFrame::OnPp(wxCommandEvent& event){
-    text_ctrl->Clear();
+    UpdateTextCtrl(calculator.PPOrLessButtonPressed());
 }
 
 //..........................................................................................................
