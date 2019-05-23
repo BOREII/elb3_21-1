@@ -110,16 +110,15 @@ public:
     TextCtrlModifier ShgOrPpButtonPressed();
     TextCtrlModifier VoOrMoreButtonPressed();
     TextCtrlModifier SpOrNotEqualButtonPressed();
+    void print();
 private:
 	struct RAM {
         RAM()
         : buffer()
-        , operation_count(0)
-        , current_operation(std::begin(buffer)) {
+        , i(0) {
         }
-		std::array<Button, 60u>           buffer           ;
-		size_t                            operation_count  ;
-		std::array<Button, 60u>::iterator current_operation;
+		std::array<Button, 60u>  buffer;
+        int i;
 	};
 
 	CalculatorState         state_              ; // Состояние калькулятора
@@ -158,16 +157,18 @@ private:
 	bool SetState(CalculatorState calculator_state) noexcept;
 
 	// Возвращает значение unary_operation от первого регистра
-	const std::variant<long double, std::string> PerformUnaryComputation(std::function<long double(long double)>&& unary_function);
+	const std::variant<long double, std::string> PerformUnaryComputation(std::function<long double(long double)> unary_function);
 	// Возвращает значение binary_operation от первого и второго регистров
-	const std::variant<long double, std::string> PerformBinaryComputation(std::function<long double(long double, long double)>&& binary_function);
+	const std::variant<long double, std::string> PerformBinaryComputation(std::function<long double(long double, long double)> binary_function);
 	// Проверяет корректность числа и возвращает true, если оно корректно
 	bool IsCorrect(const long double& value) const;
     //compares numbers in registers 1 and 2, and if true, moves iterartor
-    void MoveToIf(std::function<bool(long double, long double)>&& binary_function);
+    void MoveToIf(std::function<bool(long double, long double)> binary_function);
     //executes one operation depending on it's ID
     void SwitchCase();
     //executes whole programm
     void ExecuteProgram();
+    // Записать нажатие кнопки в массив кнопок
+    void LogOperation(Button button);
     
 };
