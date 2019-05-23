@@ -1,13 +1,12 @@
 #include <string>
-#include <stdexcept>
-#include <string>
 #include <utility>
 #include <functional>
 #include <algorithm>
-#include <optional>
 #include <cmath>
+#include <iostream>
 
 #include "computations.hpp"
+
 #define lf(...) do{ fprintf(stderr, "%s\n", __func__); fflush(stdout);} while(0)
 
 Calculator::Calculator()
@@ -48,7 +47,7 @@ long double Calculator::ExtractNumber() {
 	std::string number;
 	number_ >> number;
 	ClearNumber();
-	return number.empty() ? 0 : std::stod(number);
+	return number.empty() ? 0 : std::stold(number);
 }
 
 bool Calculator::NumberIsEmpty() const {
@@ -97,7 +96,7 @@ bool Calculator::IsCorrect(const long double& value) const {
 }
 
 const std::variant<long double, std::string>
-    Calculator::PerformUnaryComputation(std::function<long double(long double)>&& unary_function)
+    Calculator::PerformUnaryComputation(std::function<long double(long double)> unary_function)
 {
 	computation_happened = true;
 	const auto value = unary_function(*ExtractRegister(1));
@@ -112,7 +111,7 @@ const std::variant<long double, std::string>
 }
 
 const std::variant<long double, std::string>
-    Calculator::PerformBinaryComputation(std::function<long double(long double, long double)>&& binary_function)
+    Calculator::PerformBinaryComputation(std::function<long double(long double, long double)> binary_function)
 {
 	computation_happened = true;
 	const auto value = binary_function(*ExtractRegister(1), *ExtractRegister(2));
@@ -126,32 +125,46 @@ const std::variant<long double, std::string>
 	return "Incorrect computation";
 }
 
-void Calculator::MoveToIf(std::function<bool(long double, long double)>&& binary_function){
-    int address = 10 * static_cast<int>(*(ram_->current_operation+1)) +
-    static_cast<int>(*(ram_->current_operation+2));
+void Calculator::MoveToIf(std::function<bool(long double, long double)> binary_function){
+    int address =
+    10 * static_cast<int>(ram_->buffer[ram_->i+1])
+       + static_cast<int>(ram_->buffer[ram_->i+2]);
     
-    bool compare = binary_function(*ExtractRegister(1), *ExtractRegister(2));
+    bool result;
+    //if (binary_function != std::equal_to<>()) {
+        result = binary_function(*ExtractRegister(1), 0);
+    //}
     
-    if (compare)        ram_->current_operation = std::begin(ram_->buffer) + address;
-    else                ram_->current_operation += 2;
+    if (result){
+        ram_->i = address;
+    } else {
+        ram_->i += 2;
+    }
 }
 
-//.......................................................................................
+void Calculator::LogOperation(Button button) {
+    ram_->buffer[ram_->i] = button;
+    ++ram_->i;
+}
+
+//.............................................................................................
+//..............................................................................................
 
 Calculator::TextCtrlModifier Calculator::DigitButtonPressed(size_t digit) {
     lf();
-    if(state_ == CalculatorState::REAL_TIME){
+    if (state_ == CalculatorState::REAL_TIME){
         if (button_p_ == ButtonState::PRESSED) {
             SwitchOffButton(button_p_);
             computation_happened = false;
             return SetRegister(digit, ExtractNumber())
             ? TextCtrlModifier(TextCtrlNullaryOperation::CLEAR)
             : TextCtrlModifier(std::pair(TextCtrlUnaryOperation::ASSIGN, "Register does not exist"));
-        } else if(button_f_ == ButtonState::PRESSED) {
+        } else if (button_f_ == ButtonState::PRESSED) {
             SwitchOffButton(button_f_);
             if (auto value = ExtractRegister(digit); value) {
                 SetRegister(1, *value);
-                return TextCtrlNullaryOperation::DO_NOTHING;
+                SetRegister(digit, *value);
+                return std::pair(TextCtrlUnaryOperation::ASSIGN, *value);
             }
             return std::pair(TextCtrlUnaryOperation::ASSIGN, "Register does not exist");
         } else {
@@ -163,17 +176,16 @@ Calculator::TextCtrlModifier Calculator::DigitButtonPressed(size_t digit) {
             ? std::pair(TextCtrlUnaryOperation::APPEND, digit)
             : std::pair(TextCtrlUnaryOperation::ASSIGN, digit);
         }
-    }
-    else{
-        *ram_->current_operation = static_cast<Button>(digit);
-        ++ram_->current_operation;
+    } else {
+        LogOperation(static_cast<Button>(digit));
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 
 Calculator::TextCtrlModifier Calculator::AddOrSinButtonPressed() {
-	if(state_ == CalculatorState::REAL_TIME) {
+    lf();
+	if (state_ == CalculatorState::REAL_TIME) {
 		ClearNumber();
 		computation_happened = false;
 		if (button_p_ == ButtonState::PRESSED) {
@@ -184,16 +196,15 @@ Calculator::TextCtrlModifier Calculator::AddOrSinButtonPressed() {
 			return std::pair(TextCtrlUnaryOperation::ASSIGN,
 				PerformBinaryComputation(std::plus<>()));
 		}
-	}
-    else{
-        *ram_->current_operation = Button::ADD;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::ADD);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::SubtractOrCosButtonPressed() {
-	if(state_ == CalculatorState::REAL_TIME) {
+    lf();
+	if (state_ == CalculatorState::REAL_TIME) {
 		ClearNumber();
 		computation_happened = false;
 		if (button_p_ == ButtonState::PRESSED) {
@@ -204,17 +215,15 @@ Calculator::TextCtrlModifier Calculator::SubtractOrCosButtonPressed() {
 			return std::pair(TextCtrlUnaryOperation::ASSIGN,
 				PerformBinaryComputation(std::minus<>()));
 		}
-	}
-    else{
-        *ram_->current_operation = Button::SUBTRACT;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::SUBTRACT);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::MultiplyOrPiButtonPressed() {
     lf();
-	if(state_ == CalculatorState::REAL_TIME) {
+	if (state_ == CalculatorState::REAL_TIME) {
 		if (button_p_ == ButtonState::PRESSED) {
 			SwitchOffButton(button_p_);
 			ClearNumber();
@@ -227,17 +236,15 @@ Calculator::TextCtrlModifier Calculator::MultiplyOrPiButtonPressed() {
 			return std::pair(TextCtrlUnaryOperation::ASSIGN,
 				PerformBinaryComputation(std::multiplies<>()));
 		}
-	}
-    else{
-        std::cout << "multiply\n";
-        *ram_->current_operation = Button::MULTIPLY;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::MULTIPLY);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::DivideOrExpButtonPressed() {
-	if(state_ == CalculatorState::REAL_TIME) {
+    lf();
+	if (state_ == CalculatorState::REAL_TIME) {
 		ClearNumber();
 		computation_happened = false;
 		if (button_p_ == ButtonState::PRESSED) {
@@ -248,17 +255,15 @@ Calculator::TextCtrlModifier Calculator::DivideOrExpButtonPressed() {
 			return std::pair(TextCtrlUnaryOperation::ASSIGN,
 				PerformBinaryComputation(std::divides<>()));
 		}
-	}
-    else{
-        *ram_->current_operation = Button::DIVIDE;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::DIVIDE);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::InsertButtonPressed() {
     lf();
-	if(state_ == CalculatorState::REAL_TIME) {
+	if (state_ == CalculatorState::REAL_TIME) {
 		if (button_p_ == ButtonState::PRESSED) {
 			SwitchOffButton(button_p_);
 			return TextCtrlNullaryOperation::DO_NOTHING;
@@ -271,20 +276,19 @@ Calculator::TextCtrlModifier Calculator::InsertButtonPressed() {
 						return value * std::pow(10, ExtractNumber());
 					}));
 			}
+            SetRegister(2, *ExtractRegister(1));
 			SetRegister(1, ExtractNumber());
 			return TextCtrlNullaryOperation::CLEAR;
 		}
-	}
-    else{
-        *ram_->current_operation = Button::INSERT;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::INSERT);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::SwapOrLogButtonPressed() {
     lf();
-	if(state_ == CalculatorState::REAL_TIME) {
+	if (state_ == CalculatorState::REAL_TIME) {
 		if (button_p_ == ButtonState::PRESSED) {
 			SwitchOffButton(button_p_);
 			computation_happened = false;
@@ -295,15 +299,14 @@ Calculator::TextCtrlModifier Calculator::SwapOrLogButtonPressed() {
 			std::swap(registers_[0], registers_[1]);
 			return TextCtrlNullaryOperation::DO_NOTHING;
 		}
-	}
-    else{
-        *ram_->current_operation = Button::SWAP;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::SWAP);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::PointOrInverseOrScrollLeftButtonPressed() {
+    lf();
 	if(state_ == CalculatorState::REAL_TIME) {
 
 		if (button_p_ == ButtonState::PRESSED) {
@@ -333,16 +336,15 @@ Calculator::TextCtrlModifier Calculator::PointOrInverseOrScrollLeftButtonPressed
 					: std::pair(TextCtrlUnaryOperation::ASSIGN, "Number is already float");
 			}
 		}
-	}
-    else{
-        *ram_->current_operation = Button::POINT;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::POINT);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::NegativeOrSquareOrScrollRightButtonPressed() {
-	if(state_ == CalculatorState::REAL_TIME) {
+    lf();
+	if (state_ == CalculatorState::REAL_TIME) {
 		if (button_p_ == ButtonState::PRESSED) {
 			SwitchOffButton(button_p_);
 
@@ -351,7 +353,7 @@ Calculator::TextCtrlModifier Calculator::NegativeOrSquareOrScrollRightButtonPres
 			registers_.push_front(value);
 
 			return TextCtrlNullaryOperation::DO_NOTHING;
-		} else if(button_p_ == ButtonState::PRESSED) {
+		} else if(button_f_ == ButtonState::PRESSED) {
 			SwitchOffButton(button_f_);
 			computation_happened = false;
 			ClearNumber();
@@ -363,15 +365,14 @@ Calculator::TextCtrlModifier Calculator::NegativeOrSquareOrScrollRightButtonPres
 			number_ << -cur_number;
 			return std::pair(TextCtrlUnaryOperation::ASSIGN, -cur_number);
 		}
-	}
-    else{
-        *ram_->current_operation = Button::NEGATIVE;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::NEGATIVE);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::ScientificNotationOrSqrtButtonPressed() {
+    lf();
 	if (state_ == CalculatorState::REAL_TIME) {
 		if (button_f_ == ButtonState::PRESSED) {
 			SwitchOffButton(button_f_);
@@ -388,10 +389,8 @@ Calculator::TextCtrlModifier Calculator::ScientificNotationOrSqrtButtonPressed()
 			SetRegister(1, ExtractNumber());
 			return TextCtrlNullaryOperation::CLEAR;
 		}
-	}
-    else{
-        *ram_->current_operation = Button::SCIENTIFIC_NOTATION;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::SCIENTIFIC_NOTATION);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
@@ -399,37 +398,36 @@ Calculator::TextCtrlModifier Calculator::ScientificNotationOrSqrtButtonPressed()
 //..............................UPPER BUTTONS............................................
 
 Calculator::TextCtrlModifier Calculator::FButtonPressed() {
-    if(state_ == CalculatorState::REAL_TIME){
+    lf();
+    if (state_ == CalculatorState::REAL_TIME){
         if (button_f_ == ButtonState::NOT_PRESSED) {
             SwitchOnButton(button_f_);
         } else {
             SwitchOffButton(button_f_);
         }
         return TextCtrlNullaryOperation::DO_NOTHING;
-    }
-    else{
-        *ram_->current_operation = Button::F;
-        ++ram_->current_operation;
+    } else {
+        LogOperation(Button::F);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::PButtonPressed() {
-    if(state_ == CalculatorState::REAL_TIME){
+    lf();
+    if (state_ == CalculatorState::REAL_TIME){
         if (button_p_ == ButtonState::NOT_PRESSED) {
             SwitchOnButton(button_p_);
         } else {
             SwitchOffButton(button_p_);
         }
-    }
-    else{
-        *ram_->current_operation = Button::P;
-        ++ram_->current_operation;
+    } else {
+        LogOperation(Button::P);
     }
 	return TextCtrlNullaryOperation::DO_NOTHING;
 }
 
 Calculator::TextCtrlModifier Calculator::CxButtonPressed() {
+    lf();
     if (button_p_ == ButtonState::NOT_PRESSED) {
         SwitchOffButton(button_p_);
         SwitchOffButton(button_f_);
@@ -440,18 +438,16 @@ Calculator::TextCtrlModifier Calculator::CxButtonPressed() {
             number = 0;
         }
         return TextCtrlNullaryOperation::CLEAR;
-    }
-    else{
-        *ram_->current_operation = Button::CX;
-        ++ram_->current_operation;
+    } else {
+        LogOperation(Button::CX);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::PowerButtonPressed() {
+    lf();
 	if (state_ == CalculatorState::REAL_TIME) {
 		if (button_p_ == ButtonState::PRESSED) {
-			//not clear what to do
             SwitchOffButton(button_p_);
             return TextCtrlNullaryOperation::DO_NOTHING;
 		} else {
@@ -462,232 +458,204 @@ Calculator::TextCtrlModifier Calculator::PowerButtonPressed() {
 					return std::pow(lhs, rhs);
 			}));
 		}
-	}
-    else{
-        *ram_->current_operation = Button::POWER;
-        ++ram_->current_operation;
+	} else {
+        LogOperation(Button::POWER);
         return TextCtrlNullaryOperation::DO_NOTHING;
     }
 }
 
 Calculator::TextCtrlModifier Calculator::BPOrEqualButtonPresssed(){
-    if(state_ == CalculatorState::REAL_TIME) {
+    lf();
+    if (state_ == CalculatorState::REAL_TIME) {
         if (button_p_ == ButtonState::PRESSED) {
             MoveToIf(std::equal_to<>());
             SwitchOffButton(button_p_);
         } else {
-            int address = 10 * static_cast<int>(*(ram_->current_operation+1)) +
-            static_cast<int>(*(ram_->current_operation+2));
-            ram_->current_operation = std::begin(ram_->buffer) + address;
+            int address =
+            10 * static_cast<int>(ram_->buffer[ram_->i + 1])
+               + static_cast<int>(ram_->buffer[ram_->i + 2]);
+            ram_->i = address;
         }
     } else {
-        *ram_->current_operation = Button::BP;
-        ++ram_->current_operation;
+        LogOperation(Button::BP);
     }
     return TextCtrlNullaryOperation::DO_NOTHING;
 }
 
 Calculator::TextCtrlModifier Calculator:: PPOrLessButtonPressed(){
-    if(state_ == CalculatorState::REAL_TIME) {
+    lf();
+    if (state_ == CalculatorState::REAL_TIME) {
         if (button_p_ == ButtonState::PRESSED) {
             MoveToIf(std::less<>());
             SwitchOffButton(button_p_);
+        } else {
+            ram_->i = 0;
         }
-        else {
-            ram_->current_operation = std::begin(ram_->buffer);
-        }
-    }
-    else{
-        *ram_->current_operation = Button::PP;
-        ++ram_->current_operation;
+    } else {
+        LogOperation(Button::PP);
     }
     return TextCtrlNullaryOperation::DO_NOTHING;
 }
 
 Calculator::TextCtrlModifier Calculator::ShgOrRpButtonPressed() {
+    lf();
     if (button_p_ == ButtonState::PRESSED){
         SetState(CalculatorState::PROGRAMMING);
         SwitchOffButton(button_p_);
-    }
-    else{
-        SwitchCase();
-        ++ram_->current_operation;
+    } else {
+        print();
+        return std::pair(TextCtrlUnaryOperation::ASSIGN, ExtractNumber());
     }
     return TextCtrlNullaryOperation::CLEAR;
 }
 
 Calculator::TextCtrlModifier Calculator::ShgOrPpButtonPressed(){
+    lf();
     if(state_ == CalculatorState::PROGRAMMING){
+        std::cerr << "set to real time\n";
         SetState(CalculatorState::REAL_TIME);
-        std::cout << "set to real time\n";
-    }
-    if(state_ == CalculatorState::REAL_TIME){
+    } else {
         SwitchCase();
-        ++ram_->current_operation;
+        ++ram_->i;
     }
     return TextCtrlNullaryOperation::CLEAR;
 }
 
 Calculator::TextCtrlModifier Calculator::VoOrMoreButtonPressed(){
-    if(state_ == CalculatorState::REAL_TIME) {
+    lf();
+    if (state_ == CalculatorState::REAL_TIME) {
         if (button_p_ == ButtonState::PRESSED) {
-            MoveToIf(std::greater_equal<>());
+            MoveToIf(std::greater<>());
             SwitchOffButton(button_p_);
         } else {
-            //?????
-            ram_->current_operation = std::begin(ram_->buffer);
+            ram_->i = 0;
         }
     } else {
-        *ram_->current_operation = Button::VO;
-        ++ram_->current_operation;
+        LogOperation(Button::VO);
     }
     return TextCtrlNullaryOperation::DO_NOTHING;
 }
 
-Calculator::TextCtrlModifier Calculator::SpOrNotEqualButtonPressed(){
-    if(state_ == CalculatorState::REAL_TIME) {
+Calculator::TextCtrlModifier Calculator::SpOrNotEqualButtonPressed() {
+    lf();
+    if (state_ == CalculatorState::REAL_TIME) {
         if (button_p_ == ButtonState::PRESSED) {
             MoveToIf(std::not_equal_to<>());
             SwitchOffButton(button_p_);
-        } else{
-            if(button_sp_ == ButtonState::NOT_PRESSED){
+        } else {
+            if (button_sp_ == ButtonState::NOT_PRESSED){
                 button_sp_ = ButtonState::PRESSED;
                 ExecuteProgram();
             } else {
-                //ram_ = std::nullopt;
+                ram_ = std::nullopt;
                 button_sp_ = ButtonState::NOT_PRESSED;
             }
         }
     } else {
-        *ram_->current_operation = Button::SP;
-        ++ram_->current_operation;
+        LogOperation(Button::SP);
     }
     return TextCtrlNullaryOperation::DO_NOTHING;
 }
 
 void Calculator::ExecuteProgram(){
-    std::cout<< "here\n";
-    for(int i = 0; i < 5; i++){
-        std::cout << static_cast<int>(ram_->buffer[i]) << "\n";
-    }
-    for( ; button_sp_ == ButtonState::PRESSED; ++ram_->current_operation){
+    lf();
+    for( ; button_sp_ == ButtonState::PRESSED; ++ram_->i){
         SwitchCase();
     }
 }
 
 void Calculator::SwitchCase(){
-    switch (*ram_->current_operation)
-    {
+    switch (ram_->buffer[ram_->i]) {
         case Button::ZERO:
-            DigitButtonPressed(0);
+            DigitButtonPressed(0u);
             break;
-            
         case Button::ONE:
-            DigitButtonPressed(1);
+            DigitButtonPressed(1u);
             break;
-            
         case Button::TWO:
-            DigitButtonPressed(2);
+            DigitButtonPressed(2u);
             break;
-            
         case Button::THREE:
-            DigitButtonPressed(3);
+            DigitButtonPressed(3u);
             break;
-            
         case Button::FOUR:
-            DigitButtonPressed(4);
+            DigitButtonPressed(4u);
             break;
-            
         case Button::FIVE:
-            DigitButtonPressed(5);
+            DigitButtonPressed(5u);
             break;
-            
         case Button::SIX:
-            DigitButtonPressed(6);
+            DigitButtonPressed(6u);
             break;
-            
         case Button::SEVEN:
-            DigitButtonPressed(7);
+            DigitButtonPressed(7u);
             break;
-            
         case Button::EIGHT:
-            DigitButtonPressed(8);
+            DigitButtonPressed(8u);
             break;
-            
         case Button::NINE:
-            DigitButtonPressed(9);
+            DigitButtonPressed(9u);
             break;
-            
         case Button::ADD:
             AddOrSinButtonPressed();
             break;
-            
         case Button::SUBTRACT:
             SubtractOrCosButtonPressed();
             break;
-            
         case Button::MULTIPLY:
             MultiplyOrPiButtonPressed();
             break;
-            
         case Button::DIVIDE:
             DivideOrExpButtonPressed();
             break;
-            
         case Button::INSERT:
             InsertButtonPressed();
             break;
-            
         case Button::SWAP:
             SwapOrLogButtonPressed();
             break;
-            
         case Button::POINT:
             PointOrInverseOrScrollLeftButtonPressed();
             break;
-            
         case Button::NEGATIVE:
             NegativeOrSquareOrScrollRightButtonPressed();
             break;
-            
         case Button::SCIENTIFIC_NOTATION:
             ScientificNotationOrSqrtButtonPressed();
             break;
-            
         case Button::F:
             FButtonPressed();
             break;
-            
         case Button::P:
             PButtonPressed();
             break;
-            
         case Button::CX:
             CxButtonPressed();
             break;
-            
         case Button::POWER:
             PowerButtonPressed();
             break;
-            
         case Button::BP:
             BPOrEqualButtonPresssed();
             break;
-            
         case Button::PP:
             PPOrLessButtonPressed();
             break;
-            
         case Button::SP:
             SpOrNotEqualButtonPressed();
             break;
-            
         case Button::VO:
             VoOrMoreButtonPressed();
             break;
-            
         default:
             break;
     }
 }
 
+void Calculator::print(){
+    for (int i(0); i < registers_.size(); i++) {
+        std::cout << registers_[i];
+        if (i != registers_.size() - 1) std::cout << ",";
+    }
+    std::cout << "\n";
+}
