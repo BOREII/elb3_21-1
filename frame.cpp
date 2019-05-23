@@ -66,12 +66,11 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 
 	//......................................LOWER_BUTTONS..............................................
 
-	auto text_inverse             = new wxStaticText(panel, MakeId(Button::INVERSE)            , "1/x" , wxPoint(80 , 260));
-	auto text_square              = new wxStaticText(panel, MakeId(Button::SQUARE)             , "x^2" , wxPoint(130, 260));
-	auto text_scientific_notation = new wxStaticText(panel, MakeId(Button::SCIENTIFIC_NOTATION), "√x"  , wxPoint(180, 260));
-	// Сделать текст для поворотов влево и вправо!!!
-	// auto text_scroll_left         = new wxStaticText(panel, MakeId(Button::SCROLL_LEFT),       , /* значок поворота влево */, wxPoint(/* положение */));
-	// auto text_scroll_right        = new wxStaticText(panel, MakeId(Button::SCROLL_RIGHT),      , /* значок поворота влево */, wxPoint(/* положение */));
+	auto text_inverse             = new wxStaticText(panel, MakeId(Button::INVERSE)            , "1/x", wxPoint(80 , 260));
+	auto text_square              = new wxStaticText(panel, MakeId(Button::SQUARE)             , "x^2", wxPoint(130, 260));
+	auto text_scientific_notation = new wxStaticText(panel, MakeId(Button::SCIENTIFIC_NOTATION), "√x" , wxPoint(180, 260));
+	auto text_scroll_left         = new wxStaticText(panel, MakeId(Button::SCROLL_LEFT)        , "⟲", wxPoint(80 , 300));
+    auto text_scroll_right        = new wxStaticText(panel, MakeId(Button::SCROLL_RIGHT)       , "↻", wxPoint(130, 300));
 
 	auto button_point_or_inverse_or_scroll_left    = new wxButton(panel, MakeId(Button::POINT)   , "."  , wxPoint(70 , 270), BUTTON_SIZE);
 	auto button_negative_or_square_or_scroll_right = new wxButton(panel, MakeId(Button::NEGATIVE), "/-/", wxPoint(120, 270), BUTTON_SIZE);
